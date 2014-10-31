@@ -210,6 +210,10 @@ public interface Fluent<T> extends Iterable<T> {
     return copyInto(new ArrayList<>());
   }
 
+  public default List<T> toList(int size) {
+    return copyInto(new ArrayList<>(size));
+  }
+
   public default List<T> toSortedList(Comparator<? super T> comparator) {
     requireNonNull(comparator);
     List<T> list = copyInto(new ArrayList<>());
@@ -347,7 +351,7 @@ public interface Fluent<T> extends Iterable<T> {
     forEach(value -> {
       K key = toKey.apply(value);
       if (null != map.put(key, value)) {
-        throw new IllegalArgumentException("Same key used twice" + key);
+        throw new IllegalArgumentException("Same key used twice " + key + " " + value);
       }
     });
 
@@ -375,7 +379,7 @@ public interface Fluent<T> extends Iterable<T> {
     forEach(key -> {
       V value = toValue.apply(key);
       if (null != map.put(key, value)) {
-        throw new IllegalArgumentException("Same key used twice" + key);
+        throw new IllegalArgumentException("Same key used twice " + key + " " + value);
       }
     });
 
@@ -383,15 +387,30 @@ public interface Fluent<T> extends Iterable<T> {
   }
 
   public default <K, V> Map<K, V> toMap(Function<? super T, K> toKey, Function<? super T, V> toValue) {
+    return toMap(toKey, toValue, HashMap::new);
+  }
+
+  @SuppressWarnings("unchecked")
+  public default <K, V> SortedMap<K, V> toSortedMap(Function<? super T, K> toKey, Function<? super T, V> toValue) {
+    return (TreeMap) toMap(toKey, toValue, TreeMap::new);
+  }
+
+  public default <K, V> Map<K, V> toMap(Function<? super T, K> toKey, Function<? super T, V> toValue, Supplier<? extends Map<K, V>> mapSupplier) {
     requireNonNull(toKey);
     requireNonNull(toValue);
-    Map<K, V> map = new HashMap<>();
+
+    Map<K, V> map;
+    if (isParallel()) {
+      map = Collections.synchronizedMap(mapSupplier.get()); // Not efficient
+    } else {
+      map = mapSupplier.get();
+    }
 
     forEach(item -> {
       K key = toKey.apply(item);
       V value = toValue.apply(item);
       if (null != map.put(key, value)) {
-        throw new IllegalArgumentException("Same key used twice" + key);
+        throw new IllegalArgumentException("Same key used twice " + key + " " + value);
       }
     });
 
