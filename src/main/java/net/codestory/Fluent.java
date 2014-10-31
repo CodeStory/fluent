@@ -488,4 +488,42 @@ public interface Fluent<T> extends Iterable<T> {
     requireNonNull(classifier);
     return stream().collect(Collectors.groupingBy(classifier, mapFactory, Collectors.toList()));
   }
+
+  class MapUtils {
+    private MapUtils() {
+      // Static class
+    }
+
+    static <T, K, V> Map<K, V> toMap(Iterable<T> values, Function<? super T, K> toKey, Function<? super T, V> toValue, Supplier<? extends Map<K, V>> mapSupplier) {
+      requireNonNull(toKey);
+      requireNonNull(toValue);
+
+      Map<K, V> map = mapSupplier.get();
+
+      values.forEach(item -> {
+        K key = toKey.apply(item);
+        V value = toValue.apply(item);
+        if (null != map.put(key, value)) {
+          throw new IllegalArgumentException("Same key used twice " + key + " " + value);
+        }
+      });
+
+      return map;
+    }
+
+    static <T, K, V> Map<K, V> toLenientMap(Iterable<T> values, Function<? super T, K> toKey, Function<? super T, V> toValue, Supplier<? extends Map<K, V>> mapSupplier) {
+      requireNonNull(toKey);
+      requireNonNull(toValue);
+
+      Map<K, V> map = mapSupplier.get();
+
+      values.forEach(item -> {
+        K key = toKey.apply(item);
+        V value = toValue.apply(item);
+        map.put(key, value);
+      });
+
+      return map;
+    }
+  }
 }
