@@ -494,7 +494,7 @@ public interface Fluent<T> extends Iterable<T> {
       // Static class
     }
 
-    static <T, K, V> Map<K, V> toMap(Iterable<T> values, Function<? super T, K> toKey, Function<? super T, V> toValue, Supplier<? extends Map<K, V>> mapSupplier) {
+    private static <T, K, V> Map<K, V> toMap(Iterable<T> values, Function<? super T, K> toKey, Function<? super T, V> toValue, Supplier<? extends Map<K, V>> mapSupplier) {
       requireNonNull(toKey);
       requireNonNull(toValue);
 
@@ -511,7 +511,7 @@ public interface Fluent<T> extends Iterable<T> {
       return map;
     }
 
-    static <T, K, V> Map<K, V> toLenientMap(Iterable<T> values, Function<? super T, K> toKey, Function<? super T, V> toValue, Supplier<? extends Map<K, V>> mapSupplier) {
+    private static <T, K, V> Map<K, V> toLenientMap(Iterable<T> values, Function<? super T, K> toKey, Function<? super T, V> toValue, Supplier<? extends Map<K, V>> mapSupplier) {
       requireNonNull(toKey);
       requireNonNull(toValue);
 
