@@ -16,6 +16,7 @@
 package net.codestory;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
 import java.util.stream.*;
@@ -346,7 +347,8 @@ public interface Fluent<T> extends Iterable<T> {
 
   public default <K> Map<K, T> uniqueIndex(Function<? super T, K> toKey) {
     requireNonNull(toKey);
-    Map<K, T> map = new HashMap<>();
+
+    Map<K, T> map = isParallel() ? new ConcurrentHashMap<>() : new HashMap<>();
 
     forEach(value -> {
       K key = toKey.apply(value);
@@ -360,7 +362,8 @@ public interface Fluent<T> extends Iterable<T> {
 
   public default <K> Map<K, List<T>> index(Function<? super T, K> toKey) {
     requireNonNull(toKey);
-    Map<K, List<T>> multiMap = new HashMap<>();
+
+    Map<K, List<T>> multiMap = isParallel() ? new ConcurrentHashMap<>() : new HashMap<>();
 
     forEach(value -> {
       K key = toKey.apply(value);
@@ -373,38 +376,24 @@ public interface Fluent<T> extends Iterable<T> {
   }
 
   public default <V> Map<T, V> toMap(Function<? super T, V> toValue) {
-    return toMap(k -> k, toValue, HashMap::new);
+    return toMap(k -> k, toValue);
   }
 
   public default <K, V> Map<K, V> toMap(Function<? super T, K> toKey, Function<? super T, V> toValue) {
-    return toMap(toKey, toValue, HashMap::new);
+    return MapUtils.toMap(this, toKey, toValue, isParallel() ? ConcurrentHashMap::new : HashMap::new);
+  }
+
+  public default <K, V> Map<K, V> toLenientMap(Function<? super T, K> toKey, Function<? super T, V> toValue) {
+    return MapUtils.toLenientMap(this, toKey, toValue, isParallel() ? ConcurrentHashMap::new : HashMap::new);
   }
 
   @SuppressWarnings("unchecked")
   public default <K, V> SortedMap<K, V> toSortedMap(Function<? super T, K> toKey, Function<? super T, V> toValue) {
-    return (TreeMap) toMap(toKey, toValue, TreeMap::new);
-  }
-
-  public default <K, V> Map<K, V> toMap(Function<? super T, K> toKey, Function<? super T, V> toValue, Supplier<? extends Map<K, V>> mapSupplier) {
-    requireNonNull(toKey);
-    requireNonNull(toValue);
-
-    Map<K, V> map;
     if (isParallel()) {
-      map = Collections.synchronizedMap(mapSupplier.get()); // Not efficient
-    } else {
-      map = mapSupplier.get();
+      return (TreeMap) MapUtils.toMap(this, toKey, toValue, () -> Collections.synchronizedMap(new TreeMap<>()));
+    }else {
+      return (TreeMap) MapUtils.toMap(this, toKey, toValue, TreeMap::new);
     }
-
-    forEach(item -> {
-      K key = toKey.apply(item);
-      V value = toValue.apply(item);
-      if (null != map.put(key, value)) {
-        throw new IllegalArgumentException("Same key used twice " + key + " " + value);
-      }
-    });
-
-    return map;
   }
 
   public default T get(int index) {
