@@ -391,8 +391,16 @@ public interface Fluent<T> extends Iterable<T> {
   public default <K, V> SortedMap<K, V> toSortedMap(Function<? super T, K> toKey, Function<? super T, V> toValue) {
     if (isParallel()) {
       return (TreeMap) MapUtils.toMap(this, toKey, toValue, () -> Collections.synchronizedMap(new TreeMap<>()));
-    }else {
+    } else {
       return (TreeMap) MapUtils.toMap(this, toKey, toValue, TreeMap::new);
+    }
+  }
+
+  public default <K, V> Map<K, V> toLenientSortedMap(Function<? super T, K> toKey, Function<? super T, V> toValue) {
+    if (isParallel()) {
+      return (TreeMap) MapUtils.toLenientMap(this, toKey, toValue, () -> Collections.synchronizedMap(new TreeMap<>()));
+    } else {
+      return (TreeMap) MapUtils.toLenientMap(this, toKey, toValue, TreeMap::new);
     }
   }
 
