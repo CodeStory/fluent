@@ -4,7 +4,7 @@
 
   <groupId>net.code-story</groupId>
   <artifactId>fluent</artifactId>
-  <version>1.2-SNAPSHOT</version>
+  <version>1.2</version>
   <packaging>jar</packaging>
 
   <name>CodeStory - Fluent Stream/Iterable</name>
@@ -22,7 +22,7 @@
     <connection>scm:git:git@github.com:CodeStory/fluent.git</connection>
     <url>scm:git:git@github.com:CodeStory/fluent.git</url>
     <developerConnection>scm:git:git@github.com:CodeStory/fluent.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>fluent-1.2</tag>
   </scm>
 
   <licenses>
