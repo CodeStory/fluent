@@ -373,17 +373,7 @@ public interface Fluent<T> extends Iterable<T> {
   }
 
   public default <V> Map<T, V> toMap(Function<? super T, V> toValue) {
-    requireNonNull(toValue);
-    Map<T, V> map = new HashMap<>();
-
-    forEach(key -> {
-      V value = toValue.apply(key);
-      if (null != map.put(key, value)) {
-        throw new IllegalArgumentException("Same key used twice " + key + " " + value);
-      }
-    });
-
-    return map;
+    return toMap(k -> k, toValue, HashMap::new);
   }
 
   public default <K, V> Map<K, V> toMap(Function<? super T, K> toKey, Function<? super T, V> toValue) {
