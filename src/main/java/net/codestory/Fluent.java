@@ -419,11 +419,11 @@ public interface Fluent<T> extends Iterable<T> {
     throw new ArrayIndexOutOfBoundsException();
   }
 
-  public default <V, L extends List<V>> Fluent<V> flatMap(Function<? super T, L> toList) {
-    requireNonNull(toList);
+  public default <V, L extends Collection<V>> Fluent<V> flatMap(Function<? super T, L> toCollection) {
+    requireNonNull(toCollection);
     return () -> {
       Function<? super L, Stream<V>> toStream = l -> l.stream();
-      Function<? super T, Stream<V>> toListAndThenToStream = toList.andThen(toStream);
+      Function<? super T, Stream<V>> toListAndThenToStream = toCollection.andThen(toStream);
       return stream().flatMap(toListAndThenToStream);
     };
   }
