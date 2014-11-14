@@ -15,7 +15,6 @@
  */
 package net.codestory;
 
-import net.codestory.Fluent;
 import org.junit.Test;
 
 import java.util.*;

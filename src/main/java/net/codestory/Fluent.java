@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.*;
+import java.util.regex.Pattern;
 import java.util.stream.*;
 
 import static java.util.Objects.requireNonNull;
@@ -83,7 +84,7 @@ public interface Fluent<T> extends Iterable<T> {
   static Fluent<String> split(String text, String regex) {
     requireNonNull(text);
     requireNonNull(regex);
-    return of(text.split(regex));
+    return of(Pattern.compile(regex).splitAsStream(text));
   }
 
   public default void forEach(Consumer<? super T> action) {
